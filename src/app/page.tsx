@@ -5,7 +5,8 @@ import {
   SetStateAction,
   useState,
   Dispatch,
-  ComponentPropsWithoutRef
+  ComponentPropsWithoutRef,
+  MouseEvent
 } from 'react'
 
 // Type funciona como un tipo de dato individual o un objeto
@@ -47,10 +48,20 @@ const Link = ({ children, href, target }: LinkProps) => {
   )
 }
 
+// Para extender propiedades usa & seguido de las propiedades
 type SocialPillProps = ComponentPropsWithoutRef<'button'>
 
-const SocialPill = ({ onClick, ...props }: SocialPillProps) => {
-  const handleClick = () => {
+type SocialPillExtendedProps = SocialPillProps & {
+  dark?: boolean
+  variant?: 'filled' | 'outlined'
+  children: string // Si escribes una propiedad ya existente, se sobreescribe la propiedad
+}
+
+const SocialPill = ({ onClick, ...props }: SocialPillExtendedProps) => {
+  const handleClick = (
+    e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  ) => {
+    e.preventDefault()
     if (onClick) {
       alert('Hello World')
     }
@@ -65,8 +76,75 @@ const SocialPill = ({ onClick, ...props }: SocialPillProps) => {
   )
 }
 
+// Tipado de hooks
+const UserComponent = () => {
+  type UserProps = {
+    name: string
+    age: number
+    email: string
+    password: string
+  }
+
+  // Utility types
+  // omite una propiedad
+  // type UserWithoutPassword = Omit<UserProps, "password">
+
+  // Todos los props son opcionales
+  // type UpdateUser = Partial<UserProps>
+
+  // Tomar ciertos props
+  // type PublicUserData = Pick<UserProps, "name" | "email">
+
+  // Hace opcional el typo UserWithoutPassword
+  // type OptionalUserWithoutPassword = Partial<UserWithoutPassword>
+
+  // type Status = 'loading' | 'success' | 'error'
+
+  // Crea un type apartir de otro, excluyendo un tipo
+  // type AllowedStatus = Exclude<Status, "loading">
+
+  const [user, setUser] = useState<UserProps | null>(null)
+
+  const handleUserChange = () => {
+    setUser(user)
+  }
+
+  // Si existe user, mostrar el nombre
+  return <span onClick={handleUserChange}>{user?.name}</span>
+}
+
+// type generic
+function identity<T>(x: T): T {
+  return x
+}
+
+function getFirstElement<T>(arr: T[]) {
+  return arr[0]
+}
+
+// type ApiResponse<T> = {
+//   status: number
+//   data: T
+// }
+
+// const reponse1: ApiResponse<{name: string; age: number}> = {
+//   status: 200,
+//   data: {
+//     name: 'John Doe',
+//     age: 30
+//   }
+// }
+
 const Page = () => {
   const [count, setCount] = useState<number>(0)
+
+  // define el tipo de dato al invocar la función
+  identity<number>(2)
+  identity<string>('hello')
+
+  // detecta el tipo de dato
+  getFirstElement([1, 2, 3])
+  getFirstElement(['hello', 'world'])
 
   return (
     <div className='flex flex-col items-center justify-center h-screen'>
@@ -75,6 +153,7 @@ const Page = () => {
       </Button>
       <Link>Next.js</Link>
       <SocialPill onClick={() => alert('hello')}>hello world</SocialPill>
+      <UserComponent />
     </div>
   )
 }
